@@ -220,26 +220,25 @@ function wouldCauseNegativeMinorAmount(minorId, directAmount) {
     const evenSplitPerPerson = totalPeople > 0 ? amountToSplit / totalPeople : 0;
 
     // Calculate minor amounts
-    let totalMinorAmount = 0;
+    let totalPercentageBasedMinorAmount = 0;
     const minorAmounts = {};
     
     state.minors.forEach(minor => {
         if (minor.id === minorId) {
             // Use the new direct amount for this minor
             minorAmounts[minor.id] = directAmount;
-            totalMinorAmount += directAmount;
         } else if (minor.directAmount !== null && minor.directAmount !== undefined) {
             minorAmounts[minor.id] = minor.directAmount;
-            totalMinorAmount += minor.directAmount;
         } else {
             const minorAmount = evenSplitPerPerson * (minor.percent / 100);
             minorAmounts[minor.id] = minorAmount;
-            totalMinorAmount += minorAmount;
+            totalPercentageBasedMinorAmount += minorAmount;
         }
     });
 
-    // Calculate remaining amount after minors
-    const remainingAmount = amountToSplit - totalMinorAmount;
+    // Calculate remaining amount after percentage-based minors
+    // Note: direct minor amounts were already excluded from amountToSplit
+    const remainingAmount = amountToSplit - totalPercentageBasedMinorAmount;
     
     // Split remaining amount among adults
     const adultCount = state.adults.length;
@@ -310,22 +309,22 @@ function wouldCauseNegativeAmounts(personId, itemAmount) {
     const evenSplitPerPerson = totalPeople > 0 ? amountToSplit / totalPeople : 0;
 
     // Calculate minor amounts
-    let totalMinorAmount = 0;
+    let totalPercentageBasedMinorAmount = 0;
     const minorAmounts = {};
     
     state.minors.forEach(minor => {
         if (minor.directAmount !== null && minor.directAmount !== undefined) {
             minorAmounts[minor.id] = minor.directAmount;
-            totalMinorAmount += minor.directAmount;
         } else {
             const minorAmount = evenSplitPerPerson * (minor.percent / 100);
             minorAmounts[minor.id] = minorAmount;
-            totalMinorAmount += minorAmount;
+            totalPercentageBasedMinorAmount += minorAmount;
         }
     });
 
-    // Calculate remaining amount after minors
-    const remainingAmount = amountToSplit - totalMinorAmount;
+    // Calculate remaining amount after percentage-based minors
+    // Note: direct minor amounts were already excluded from amountToSplit
+    const remainingAmount = amountToSplit - totalPercentageBasedMinorAmount;
     
     // Split remaining amount among adults
     const adultCount = state.adults.length;
@@ -394,24 +393,24 @@ function calculateAmounts() {
     // Calculate minor amounts
     // For percentage-based minors: they pay evenSplitPerPerson * (percent / 100)
     // For direct amount minors: they pay their direct amount
-    let totalMinorAmount = 0;
+    let totalPercentageBasedMinorAmount = 0;
     const minorAmounts = {};
     
     state.minors.forEach(minor => {
         if (minor.directAmount !== null && minor.directAmount !== undefined) {
             // Use direct amount
             minorAmounts[minor.id] = minor.directAmount;
-            totalMinorAmount += minor.directAmount;
         } else {
             // Use percentage-based amount: even split * percentage
             const minorAmount = evenSplitPerPerson * (minor.percent / 100);
             minorAmounts[minor.id] = minorAmount;
-            totalMinorAmount += minorAmount;
+            totalPercentageBasedMinorAmount += minorAmount;
         }
     });
 
-    // Calculate remaining amount after minors
-    const remainingAmount = amountToSplit - totalMinorAmount;
+    // Calculate remaining amount after percentage-based minors
+    // Note: direct minor amounts were already excluded from amountToSplit
+    const remainingAmount = amountToSplit - totalPercentageBasedMinorAmount;
     
     // Split remaining amount among adults
     const adultCount = state.adults.length;
@@ -436,6 +435,22 @@ function calculateAmounts() {
     Object.assign(amounts, minorAmounts);
 
     return amounts;
+}
+
+// Update amounts without re-rendering (preserves focus)
+function updateAmountsOnly() {
+    const amounts = calculateAmounts();
+    const allPeople = [...state.adults, ...state.minors];
+
+    allPeople.forEach(person => {
+        const personRow = peopleList.querySelector(`[data-person-id="${person.id}"]`);
+        if (personRow) {
+            const amountElement = personRow.querySelector('.person-amount');
+            if (amountElement) {
+                amountElement.textContent = `$${amounts[person.id].toFixed(2)}`;
+            }
+        }
+    });
 }
 
 // Render calculation page
@@ -646,13 +661,14 @@ function attachMinorControls(row, person) {
             // Remove active state from percentage buttons
             buttons.forEach(b => b.classList.remove('active'));
             
-            // Recalculate and re-render
-            renderCalculationPage();
-        } else if (amountInput.value === '' || amountInput.value === '0' || isNaN(value)) {
+            // Update amounts without full re-render to preserve focus
+            updateAmountsOnly();
+        } else {
+            // Don't update state while user is typing (e.g., backspace)
+            // Only clear the state, but don't update display to avoid losing focus
             person.directAmount = null;
-            
-            // Recalculate and re-render
-            renderCalculationPage();
+            // Update amounts to reflect the cleared state
+            updateAmountsOnly();
         }
     });
     

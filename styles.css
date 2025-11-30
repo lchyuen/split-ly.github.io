@@ -434,6 +434,15 @@ h2 {
     transition: border-color 0.3s;
     box-sizing: border-box;
     max-width: 100%;
+    /* Hide spinner controls */
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.minor-amount-input-wrapper input::-webkit-outer-spin-button,
+.minor-amount-input-wrapper input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .minor-amount-input-wrapper input:focus {
