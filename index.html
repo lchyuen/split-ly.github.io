@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Splitter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div id="landing-page" class="page active">
+            <h1>Split-ly</h1>
+            <form id="bill-form">
+                <div class="form-group">
+                    <label for="total-amount">Total Amount (Post Tax)</label>
+                    <div class="input-wrapper">
+                        <span class="currency">$</span>
+                        <input type="number" id="total-amount" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tip-input">Tip</label>
+                    <div class="input-wrapper" id="tip-wrapper">
+                        <input type="number" id="tip-input" step="0.1" min="0" max="100" placeholder="0">
+                        <span class="tip-toggle" id="tip-toggle">%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Number of Adults</label>
+                    <div class="counter-control">
+                        <button type="button" class="counter-btn" id="adults-decrease">−</button>
+                        <input type="number" id="adults-count" min="1" value="1" readonly>
+                        <button type="button" class="counter-btn" id="adults-increase">+</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Number of Minors</label>
+                    <div class="counter-control">
+                        <button type="button" class="counter-btn" id="minors-decrease">−</button>
+                        <input type="number" id="minors-count" min="0" value="0" readonly>
+                        <button type="button" class="counter-btn" id="minors-increase">+</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Calculate Split</button>
+            </form>
+        </div>
+
+        <div id="calculation-page" class="page">
+            <div class="page-header">
+                <button id="back-btn" class="btn-back">← Back</button>
+                <h2>Bill Split</h2>
+            </div>
+            
+            <div class="summary">
+                <div class="summary-item">
+                    <span>Total Bill:</span>
+                    <span id="summary-total">$0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Tip:</span>
+                    <span id="summary-tip">$0.00</span>
+                </div>
+                <div class="summary-item total">
+                    <span>Grand Total:</span>
+                    <span id="summary-grand-total">$0.00</span>
+                </div>
+            </div>
+
+            <div id="people-list" class="people-list"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
